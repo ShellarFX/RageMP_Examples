@@ -3,7 +3,8 @@ mp.events.add('initVariables', (player) => {
         id: 0,
         vehicle: null,
         stage: null,
-        salary: 0
+        salary: 0,
+        delVehTimer: null
     }
     player.jobSkills = [];
 
@@ -55,10 +56,6 @@ mp.events.add('startJob', (player) => {
         player.job.vehicle = mp.vehicles.new('Bus', vehSpawnPoints[Math.floor(Math.random() * vehSpawnPoints.length)]);
         player.job.vehicle.owner = player;
         player.job.stage = 0;
-        player.putIntoVehicle(player.job.vehicle, -1);
-        let route = busPoints[player.job.stage];
-        player.call('createCheckpoint', [new mp.Vector3(route[0], route[1], route[2]), 4]);
-        player.call('createBlip', ['Остановка #' + player.job.stage, new mp.Vector3(route[0], route[1], route[2]), 46]);
     }
 });
 
@@ -66,14 +63,18 @@ mp.events.add('stopJob', (player) => {
     if (player.job.id == 1) {
         player.job.id = 0;
         player.job.vehicle.destroy();
+        player.job.vehicle = null;
+        player.job.stage = null;
         player.call('destroyCheckpoint');
         player.call('destroyBlip');
         player.notify('Вы заработали ' + player.job.salary + "$");
+        player.job.salary = 0;
     }
 });
 
 mp.events.add('jobEnterCheckpoint', (player) => {
     if (player.job.id == 1) {
+        if (!player.vehicle || player.vehicle != player.job.vehicle) return player.notify('Вы должны находится в рабочем автомобиле.');
         player.call('destroyCheckpoint');
         player.call('destroyBlip');
         player.job.stage++;
@@ -93,5 +94,39 @@ mp.events.add('jobEnterCheckpoint', (player) => {
         let route = busPoints[player.job.stage];
         player.call('createCheckpoint', [new mp.Vector3(route[0], route[1], route[2]), 4]);
         player.call('createBlip', ['Остановка #' + player.job.stage, new mp.Vector3(route[0], route[1], route[2]), 46]);
+    }
+});
+
+mp.events.add('playerExitVehicle', (player, vehicle) => {
+    if (player.job.id == 1 && player.job.vehicle == vehicle) {
+        player.notify('У Вас есть 60 секунд, чтобы вернуться в автобус.');
+        player.job.delVehTimer = setTimeout(() => {
+            mp.events.call('stopJob', player);
+        }, 60000);
+    }
+});
+
+mp.events.add('playerStartEnterVehicle', (player, vehicle) => {
+    if (player.job.id == 1 && player.job.vehicle == vehicle) {
+        player.putIntoVehicle(player.job.vehicle, -1);
+        let route = busPoints[player.job.stage];
+        player.call('createCheckpoint', [new mp.Vector3(route[0], route[1], route[2]), 4]);
+        player.call('createBlip', ['Остановка #' + player.job.stage, new mp.Vector3(route[0], route[1], route[2]), 46]);
+
+        if (player.job.delVehTimer) {
+            clearTimeout(player.job.delVehTimer);
+        }
+    }
+});
+
+mp.events.add('playerDeath', (player, reason, killer) => {
+    if (player.job.id == 1) {
+        mp.events.call('stopJob', player);
+    }
+})
+
+mp.events.add('playerQuit', (player, type, reason) => {
+    if (player.job.id == 1) {
+        mp.events.call('stopJob', player);
     }
 });
