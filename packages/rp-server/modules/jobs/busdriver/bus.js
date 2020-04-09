@@ -18,13 +18,13 @@ let vehSpawnPoints = [
 ]
 
 let busPoints = [
-    [224.388, -1099.068, 28.750],
-    [254.147, -986.887, 28.376],
-    [114.474, -785.589, 30.558],
-    [-244.494, -713.529, 32.624],
-    [-250.006, -882.639, 29.395],
-    //[-61.852, -994.706, 28.252],
-    [143.795, -1026.155, 28.434]
+    [224.388, -1099.068, 28.050],
+    [254.147, -986.887, 27.676],
+    [114.474, -785.589, 29.858],
+    [-244.494, -713.529, 31.924],
+    [-250.006, -882.639, 28.895],
+    //[-61.852, -994.706, 28.052],
+    [143.795, -1026.155, 27.734]
 ]
 
 let busMarker = mp.markers.new(1, new mp.Vector3(238.698, -1147.730, 29.308 - 1.5), 1.5,
@@ -62,6 +62,7 @@ mp.events.add('startJob', (player) => {
         player.job.vehicle = mp.vehicles.new('Bus', vehSpawnPoints[ranIndex], {
             heading: vehSpawnPoints[ranIndex][3]
         });
+        player.call('createMarker', [new mp.Vector3(vehSpawnPoints[ranIndex][0], vehSpawnPoints[ranIndex][1], vehSpawnPoints[ranIndex][2] + 3.5)]);
         player.job.vehicle.owner = player;
         player.job.stage = 0;
     }
@@ -75,7 +76,9 @@ mp.events.add('stopJob', (player) => {
         player.job.stage = null;
         player.call('destroyCheckpoint');
         player.call('destroyBlip');
+        player.call('destroyMarker');
         player.notify('Вы заработали ' + player.job.salary + "$");
+        // Где-то тут должны прибавляться деньги...
         player.job.salary = 0;
     }
 });
@@ -114,18 +117,19 @@ mp.events.add('jobEnterCheckpoint', (player) => {
 mp.events.add('playerExitVehicle', (player, vehicle) => {
     if (player.job.id == 1 && player.job.vehicle == vehicle) {
         player.notify('У Вас есть 60 секунд, чтобы вернуться в автобус.');
+        player.call('createMarker', [new mp.Vector3(player.job.vehicle.position.x, player.job.vehicle.position.y, player.job.vehicle.position.z + 3.5)])
         player.job.delVehTimer = setTimeout(() => {
             mp.events.call('stopJob', player);
         }, 60000);
     }
 });
 
-mp.events.add('playerStartEnterVehicle', (player, vehicle) => {
+mp.events.add('playerEnterVehicle', (player, vehicle) => {
     if (player.job.id == 1 && player.job.vehicle == vehicle) {
         let route = busPoints[player.job.stage];
-        player.call('createCheckpoint', [new mp.Vector3(route[0], route[1], route[2]), 4]);
-        player.call('createBlip', ['Остановка #' + player.job.stage, new mp.Vector3(route[0], route[1], route[2]), 46]);
-
+        player.call('createCheckpoint', [new mp.Vector3(route[0], route[1], route[2]), 4, player.job.stage]);
+        player.call('createBlip', ['Остановка #' + player.job.stage, new mp.Vector3(route[0], route[1], route[2]), 46, player.job.stage]);
+        player.call('destroyMarker');
         if (player.job.delVehTimer) {
             clearTimeout(player.job.delVehTimer);
         }

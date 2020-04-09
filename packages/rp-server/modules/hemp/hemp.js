@@ -4,9 +4,7 @@ mp.events.add('initVariables', (player) => {
 });
 
 let hempPoints = [
-    [-445.5, 1201.7, 325.642],
-    [-447.5, 1202.3, 325.654],
-    [-449.5, 1202.9, 325.653]
+    [245.884, -1159.265, 29.16]
 ]
 
 let hempColshapes = []
@@ -17,12 +15,12 @@ for (let i = 0; i < hempPoints.length; i++) {
         color: [255, 255, 255, 200],
         drawDistance: 10,
         los: true,
-        font: 4,
+        font: 4
     });
     let marker = mp.markers.new(0, new mp.Vector3(hempPoints[i][0], hempPoints[i][1], hempPoints[i][2]), 0.75, {
         color: [255, 255, 0, 200]
     });
-    let colshape = mp.colshapes.newCircle(hempPoints[i][0], hempPoints[i][1], 1);
+    let colshape = mp.colshapes.newSphere(hempPoints[i][0], hempPoints[i][1], hempPoints[i][2], 1);
     colshape.info = {
         id: i + 1,
         label: label,
@@ -67,18 +65,27 @@ mp.events.addCommand('planthemp', (player) => {
 });
 
 mp.events.addCommand('harvesthemp', (player) => {
-    if (!player.colshape) return;
-    hempColshapes.forEach(hempColshape => {
-        if (player.colshape == hempColshape) {
-            let colshape = player.colshape;
-            if (colshape.info.hemp == 0) return player.notify('Здесь не растет конопля.');
-            if (colshape.info.hemp == 1) return player.notify('Конопля еще не выросла.');
-            colshape.info.hemp = 0;
-            colshape.info.label.text = 'Место #' + colshape.info.id + '~n~Конопля не посажена.';
-            colshape.info.marker.setColor(255, 255, 0, 200);
-            player.hemp++;
-            player.notify('Вы собрали коноплю.~n~У Вас: ' + player.hemp);
-            return;
-        }
-    });
+    if (!player.colshape || hempColshapes.indexOf(player.colshape) == -1) return;
+    let colshape = player.colshape;
+    if (colshape == hempColshape) {
+        let colshape = player.colshape;
+        if (colshape.info.hemp == 0) return player.notify('Здесь не растет конопля.');
+        if (colshape.info.hemp == 1) return player.notify('Конопля еще не выросла.');
+        colshape.info.hemp = 0;
+        colshape.info.label.text = 'Место #' + colshape.info.id + '~n~Конопля не посажена.';
+        colshape.info.marker.setColor(255, 255, 0, 200);
+        player.hemp++;
+        player.notify('Вы собрали коноплю.~n~У Вас: ' + player.hemp);
+        return;
+    }
+});
+
+mp.events.addCommand('smokehemp', (player) => {
+    player.playAnimation('mp_player_int_uppersmoke', 'mp_player_int_smoke', 1, 49);
+    setTimeout(() => {
+        player.playAnimation('mp_player_int_uppersmoke', 'mp_player_int_smoke', 1, 48);
+        setTimeout(() => {
+            player.stopAnimation();
+        }, 1000);
+    }, 6000);
 });

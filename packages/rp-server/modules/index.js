@@ -1,5 +1,6 @@
 require('./commands/admin');
 require('./hemp/hemp');
-require('./log');
+require('./gangzones/zones');
 
 require('./jobs/busdriver/bus');
+

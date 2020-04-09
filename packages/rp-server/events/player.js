@@ -1,4 +1,4 @@
-let spawnpoint = new mp.Vector3(-431.402, 1174.112, 325.856);
+let spawnpoint = new mp.Vector3(238.761, -1151.578, 29.289);
 
 mp.events.add('playerDeath', (player, reason, killer) => {
     player.spawn(spawnpoint);
@@ -7,6 +7,8 @@ mp.events.add('playerDeath', (player, reason, killer) => {
 
 mp.events.add('playerReady', (player) => {
     mp.events.call('initVariables', player);
+    player.call('clearBlips');
+    player.call('createZones');
 });
 
 mp.events.add('playerJoin', (player) => {

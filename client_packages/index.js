@@ -1,20 +1,13 @@
 require('./modules/jobs/jobs');
+require('./modules/blips');
 
+let player = mp.players.local;
 mp.events.add('render', () => {
-  /*let scale = 0.45;
-  if (mp.players.local.vehicle) {
-    scale = 0.4;
-    mp.game.graphics.drawText(`${mp.players.local.vehicle.name}\nHP: ${mp.players.local.vehicle.getHealth()}`, [mp.players.local.vehicle.position.x, mp.players.local.vehicle.position.y, mp.players.local.vehicle.position.z + 1.1], {
-      font: 4,
-      color: [255, 255, 255, 200],
-      scale: [0.6, 0,6],
-      outline: true
-    });
-  }
-  mp.game.graphics.drawText(`${mp.players.local.name} (${mp.players.local.id})\nHP: ${mp.players.local.getHealth()}`, [mp.players.local.position.x, mp.players.local.position.y, mp.players.local.position.z + 1.1], {
+  mp.game.graphics.drawText(`x: ${player.position.x.toFixed(3)} y: ${player.position.y.toFixed(3)} z: ${player.position.z.toFixed(3)}`, [0.07, 0.005], {
     font: 4,
+    centre: false,
     color: [255, 255, 255, 200],
-    scale: [scale, scale],
+    scale: [0.5, 0.5],
     outline: true
-  });*/
+  });
 });

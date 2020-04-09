@@ -1,5 +1,6 @@
 let jobBlip = null;
 let jobCheckpoint = null;
+let jobMarker = null;
 
 mp.events.add('createCheckpoint', (position, radius, stage) => {
     checkpoint = mp.checkpoints.new(1, position, radius, {
@@ -28,6 +29,12 @@ mp.events.add('createBlip', (name, position, color, stage) => {
     }
 });
 
+mp.events.add('createMarker', (position) => {
+    jobMarker = mp.markers.new(0, position, 0.65, {
+        color: [255, 255, 0, 255]
+    });
+});
+
 mp.events.add('destroyCheckpoint', () => {
     if (jobCheckpoint) {
         jobCheckpoint.destroy();
@@ -39,6 +46,13 @@ mp.events.add('destroyBlip', () => {
     if (jobBlip) {
         jobBlip.destroy();
         jobBlip = null;
+    }
+});
+
+mp.events.add('destroyMarker', () => {
+    if (jobMarker) {
+        jobMarker.destroy();
+        jobMarker = null;
     }
 });
 
